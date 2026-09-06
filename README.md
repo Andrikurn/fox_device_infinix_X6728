@@ -24,7 +24,7 @@ Camera                  | 50 MP (wide); 8 MP (front, wide)
 ## Features
 
 - [X] ADB
-- [ ] Decryption (almost works)
+- [X] Decryption
 - [X] Display
 - [X] Fasbootd
 - [X] Flashing
@@ -36,6 +36,25 @@ Camera                  | 50 MP (wide); 8 MP (front, wide)
 
 ## Building
 
-'''
-TODO: write build instructions.
-'''
+Sync OrangeFox 14.1 Manifest:
+
+```
+git clone https://gitlab.com/OrangeFox/sync.git
+cd sync
+./orangefox_sync.sh --branch 14.1 --path "~/YOUR/PATH/HERE"
+```
+
+Clone the device tree:
+
+```
+cd ~/YOUR/PATH/HERE
+git clone https://github.com/Andrikurn/fox_device_infinix_X6728.git -b fox_14.1 ./device/infinix/X6728
+```
+
+Build:
+
+```
+export ALLOW_MISSING_DEPENDENCIES=true
+source build/envsetup.sh
+lunch fox_X6728-ap2a-eng && mka adbd vendorbootimage
+```
