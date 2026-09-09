@@ -24,7 +24,6 @@ AB_OTA_PARTITIONS += \
     boot \
     dtbo \
     lk \
-    odm \
     odm_dlkm \
     product \
     system \
@@ -57,8 +56,9 @@ PRODUCT_PACKAGES += \
     otapreopt_script \
     cppreopts.sh
 
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.twrp.vendor_boot=true
+# Kernel
+PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := false
+PRODUCT_ENABLE_UFFD_GC := true
 
 # Dynamic Partitions
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
@@ -66,6 +66,22 @@ PRODUCT_USE_DYNAMIC_PARTITIONS := true
 # API
 PRODUCT_SHIPPING_API_LEVEL := 34
 PRODUCT_TARGET_VNDK_VERSION := 34
+
+# Vendor Properties
+PRODUCT_VENDOR_PROPERTIES += \
+    ro.twrp.vendor_boot=true
+
+# System Properties
+PRODUCT_SYSTEM_PROPERTIES += \
+    ro.postinstall.fstab.prefix=/system \
+    ro.sys.usb.storage.type?=mtp \
+    ro.crypto.volume.filenames_mode=aes-256-cts \
+    ro.hardware.gatekeeper=trustonic \
+    ro.hardware.kmsetkey=trustonic \
+    ro.vendor.mtk_svp_on_mtee_support=1 \
+    ro.vendor.mtk_tee_gp_support=1 \
+    ro.vendor.mtk_trustonic_tee_support=1 \
+    keymaster_ver=4.1
 
 # Boot control HAL
 PRODUCT_PACKAGES += \
@@ -75,24 +91,16 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES_DEBUG += \
     bootctl
 
-# Fastbootd
+# FastbootD
 PRODUCT_PACKAGES += \
     android.hardware.fastboot@1.0-impl-mock \
 	android.hardware.fastboot@1.0-impl-mock.recovery \
     fastbootd
 
-# Kernel
-PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := false
-PRODUCT_ENABLE_UFFD_GC := true
-
-# Health Hal
+# Health HAL
 PRODUCT_PACKAGES += \
     android.hardware.health-service.example \
     android.hardware.health-service.example_recovery
-
-# Gatekeeper
-PRODUCT_PACKAGES += \
-    android.hardware.gatekeeper-V1-ndk
 
 # Security
 PRODUCT_PACKAGES += \
@@ -100,13 +108,17 @@ PRODUCT_PACKAGES += \
     android.hardware.security.secureclock-V1-ndk \
     android.hardware.security.sharedsecret-V1-ndk
 
-# Keymint
-PRODUCT_PACKAGES += \
-    android.hardware.security.keymint-V3-ndk
-
 # Keystore2
 PRODUCT_PACKAGES += \
     android.system.keystore2
+
+# Gatekeeper
+PRODUCT_PACKAGES += \
+    android.hardware.gatekeeper-V1-ndk
+
+# Keymint
+PRODUCT_PACKAGES += \
+    android.hardware.security.keymint-V3-ndk
 
 # MTK plpath utils
 PRODUCT_PACKAGES += \

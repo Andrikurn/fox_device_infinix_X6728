@@ -75,7 +75,6 @@ BOARD_MAIN_PARTITION_LIST += \
     system_ext \
     vendor \
     vendor_dlkm \
-	odm \
 	odm_dlkm
 
 TARGET_COPY_OUT_ODM_DLKM := odm_dlkm
@@ -95,9 +94,6 @@ BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
 BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
-
-# Properties
-TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 
 # Recovery
 BOARD_HAS_LARGE_FILESYSTEM := true
