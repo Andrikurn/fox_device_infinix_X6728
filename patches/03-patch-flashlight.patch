@@ -1,0 +1,61 @@
+--- a/bootable/recovery/gui/action.cpp
++++ b/bootable/recovery/gui/action.cpp
+@@ -2575,9 +2575,10 @@ int GUIAction::flashlightImpl(std::string arg __unused)
+     if (enable_flash == "1") {
+ 		std::string path_one, path_two,
+ 					fl_one_on, fl_two_on,
+-					max_one, max_two,
+-					bright_one, bright_two,
+-					max_brt_one, max_brt_two,
++                   torch_one,
++					max_two,
++					bright_two,
++					max_brt_two,
+ 					fl_used;
+ 		
+ 		// get maintainer flash files
+@@ -2601,28 +2602,22 @@ int GUIAction::flashlightImpl(std::string arg __unused)
+ 		}
+ 		
+ 		if (!path_one.empty()) {
+-			bright_one = path_one + "/brightness";
+-			max_one = path_one + "/max_brightness";
+-			if (TWFunc::Path_Exists(max_one)) {
+-				TWFunc::read_file(max_one, max_brt_one);
+-			} else {
+-				max_brt_one = "1";
+-			}
+-			if (TWFunc::Path_Exists(bright_one)) {
+-				TWFunc::read_file(bright_one, fl_one_on);
+-				// If we use flashlight first time after reboot, always enable it
+-				if (fl_one_on == "0" || fl_used == "0") {
+-					TWFunc::write_to_file(bright_one, max_brt_one);
+-          DataManager::SetValue("of_flash_on", "1");
+-				} else {
+-					TWFunc::write_to_file(bright_one, "0");
+-          DataManager::SetValue("of_flash_on", "0");
+-				}
+-			} else {
+-				gui_print_color("warning", "Flashlight file not found!\n");
+-				return 0;
+-			}
+-		}
++          torch_one = path_one + "/flashlight_torch";
++          if (TWFunc::Path_Exists(torch_one)) {
++            TWFunc::read_file(torch_one, fl_one_on);
++            bool one_is_on = (fl_one_on.find("0 0 0 1") != std::string::npos);
++            if (!one_is_on || fl_used == "0") {
++              TWFunc::write_to_file(torch_one, "0 0 0 1");
++              DataManager::SetValue("of_flash_on", "1");
++            } else {
++              TWFunc::write_to_file(torch_one, "0 0 0 0");
++              DataManager::SetValue("of_flash_on", "0");
++            }
++          } else {
++            gui_print_color("warning", "Flashlight file not found!\n");
++            return 0;
++          }
++        }
+ 		
+ 		if (!path_two.empty()) {
+ 			bright_two = path_two + "/brightness";
