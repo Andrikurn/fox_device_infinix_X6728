@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # This file is part of the OrangeFox Recovery Project
-# Copyright (C) 2020-2025 The OrangeFox Recovery Project
+# Copyright (C) 2020-2026 The OrangeFox Recovery Project
 #
 # OrangeFox is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,8 +21,11 @@
 
 device_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 workspace_root="$(cd "${device_dir}/../../.." && pwd)"
-vibration_patch_file="${device_dir}/patches/01-patch-vibration.patch"
-health_patch_file="${device_dir}/patches/02-patch-health-hal.patch"
+patch_files=(
+	"${device_dir}/patches/01-patch-vibration.patch"
+	"${device_dir}/patches/02-patch-health-hal.patch"
+	"${device_dir}/patches/03-patch-flashlight.patch"
+)
 
 export ALLOW_MISSING_DEPENDENCIES=true
 
@@ -33,28 +36,29 @@ export FOX_INSTALLER_VENDOR_BOOT_RAMDISK_INSTALL=1
 export FOX_USE_ZSTD_BINARY=1
 export FOX_USE_DMSETUP=1
 
-if [[ ! -f "${health_patch_file}" ]]; then
-    echo "[X6728] Missing patch: ${health_patch_file}"
-elif [[ ! -f "${vibration_patch_file}" ]]; then
-    echo "[X6728] Missing patch: ${vibration_patch_file}"
-elif ! command -v patch >/dev/null 2>&1; then
-    echo "[X6728] Missing required command: patch"
-elif (
-    cd "${workspace_root}" &&
-	patch -p1 -N --dry-run --silent < "${vibration_patch_file}" >/dev/null 2>&1
-    patch -p1 -N --dry-run --silent < "${health_patch_file}" >/dev/null 2>&1
-); then
-    if (
-        cd "${workspace_root}" &&
-		patch -p1 -N --silent < "${vibration_patch_file}" >/dev/null 2>&1
-        patch -p1 -N --silent < "${health_patch_file}" >/dev/null 2>&1
-    ); then
-        echo "[X6728] Applied patches."
-    else
-        echo "[X6728] Failed to apply patches."
-    fi
+if ! command -v patch >/dev/null 2>&1; then
+	echo "[X6728] Missing required command: patch"
 else
-    echo "[X6728] Patches already applied or not applicable"
+	for patch_file in "${patch_files[@]}"; do
+		patch_name="$(basename "${patch_file}")"
+		if [ ! -f "${patch_file}" ]; then
+			echo "[X6728] Missing patch: ${patch_file}"
+		elif (
+			cd "${workspace_root}" &&
+			patch -p1 -N --dry-run --silent < "${patch_file}" >/dev/null 2>&1
+		); then
+			if (
+				cd "${workspace_root}" &&
+				patch -p1 -N --silent < "${patch_file}" >/dev/null 2>&1
+			); then
+				echo "[X6728] Applied patch: ${patch_name}"
+			else
+				echo "[X6728] Failed to apply patch: ${patch_name}"
+			fi
+		else
+			echo "[X6728] Patch already applied or not applicable: ${patch_name}"
+		fi
+	done
 fi
 
-unset device_dir workspace_root patch_file
+unset device_dir workspace_root patch_files patch_file patch_name
