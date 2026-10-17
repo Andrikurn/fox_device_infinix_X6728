@@ -23,11 +23,13 @@ AB_OTA_UPDATER := true
 AB_OTA_PARTITIONS += \
     boot \
     dtbo \
-    lk \
+    init_boot \
     odm_dlkm \
     product \
     system \
+    system_dlkm \
     system_ext \
+    vbmeta \
     vbmeta_system \
     vbmeta_vendor \
     vendor \
@@ -77,7 +79,7 @@ PRODUCT_PACKAGES_DEBUG += \
 # FastbootD
 PRODUCT_PACKAGES += \
     android.hardware.fastboot@1.0-impl-mock \
-	android.hardware.fastboot@1.0-impl-mock.recovery \
+    android.hardware.fastboot@1.0-impl-mock.recovery \
     fastbootd
 
 # create_pl_dev
@@ -86,7 +88,7 @@ PRODUCT_PACKAGES += \
 
 # MediaTek's AIDL boot control HAL
 PRODUCT_PACKAGES += \
-	android.hardware.boot-service.mediatek_recovery
+    android.hardware.boot-service.mediatek_recovery
 
 # Health HAL
 PRODUCT_PACKAGES += \
