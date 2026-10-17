@@ -112,6 +112,13 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.security.keymint-V3-ndk
 
+# verbose_abort shim
+PRODUCT_PACKAGES += \
+    libverbose_abort_shim
+
+TARGET_RECOVERY_DEVICE_MODULES += \
+    libverbose_abort_shim
+
 # Update engine
 PRODUCT_PACKAGES += \
     update_engine \
@@ -120,3 +127,6 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PACKAGES_DEBUG += \
     update_engine_client
+
+TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES += \
+    $(TARGET_OUT_SHARED_LIBRARIES)/libverbose_abort_shim.so

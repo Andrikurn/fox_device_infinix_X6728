@@ -1,0 +1,15 @@
+cc_library_shared {
+    name: "libverbose_abort_shim",
+    srcs: ["verbose_abort_shim.cpp"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+    ],
+    shared_libs: [
+        "liblog",
+    ],
+    compile_multilib: "64",
+    vendor: true,
+    recovery_available: true,
+}
