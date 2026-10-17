@@ -1,14 +1,17 @@
 --- a/bootable/recovery/minuitwrp/events.cpp
 +++ b/bootable/recovery/minuitwrp/events.cpp
-@@ -61,6 +61,7 @@
+@@ -61,6 +61,10 @@
  #define VIBRATOR_TIMEOUT_FILE	"/sys/class/timed_output/vibrator/enable"
  #define VIBRATOR_TIME_MS    50
  
++#include <chrono>
++#include <thread>
++
 +#define LEDS_VIBRATOR_BRIGHTNESS_FILE	"/sys/class/leds/vibrator/brightness"
  #define LEDS_HAPTICS_DURATION_FILE	"/sys/class/leds/vibrator/duration"
  #define LEDS_HAPTICS_ACTIVATE_FILE	"/sys/class/leds/vibrator/activate"
  
-@@ -182,11 +183,17 @@
+@@ -182,11 +186,22 @@
          write_to_file(VIBRATOR_TIMEOUT_FILE, tout);
      }
  #else
@@ -16,8 +19,13 @@
 +    if (std::ifstream(LEDS_VIBRATOR_BRIGHTNESS_FILE).good()) {
 +        if (timeout_ms < 80) timeout_ms = 80;
 +        write_to_file(LEDS_VIBRATOR_BRIGHTNESS_FILE, "255");
-+        usleep(timeout_ms * 1000);
-+        write_to_file(LEDS_VIBRATOR_BRIGHTNESS_FILE, "0");
++        // Never sleep on the caller's thread: it is the GUI/input thread, and a
++        // blocking usleep() here freezes rendering for the whole vibration
++        // (80-160 ms), which shows up as scroll/tap lag.
++        std::thread([timeout_ms]() {
++            std::this_thread::sleep_for(std::chrono::milliseconds(timeout_ms));
++            write_to_file(LEDS_VIBRATOR_BRIGHTNESS_FILE, "0");
++        }).detach();
 +    } else if (std::ifstream(LEDS_HAPTICS_ACTIVATE_FILE).good()) {
          write_to_file(LEDS_HAPTICS_DURATION_FILE, tout);
          write_to_file(LEDS_HAPTICS_ACTIVATE_FILE, "1");
