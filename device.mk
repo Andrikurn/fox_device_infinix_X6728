@@ -92,7 +92,6 @@ PRODUCT_PACKAGES += \
 
 # Health HAL
 PRODUCT_PACKAGES += \
-    android.hardware.health-service.example \
     android.hardware.health-service.example_recovery
 
 # Security
