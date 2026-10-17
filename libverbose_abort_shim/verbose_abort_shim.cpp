@@ -12,7 +12,7 @@
 extern "C" void android_set_abort_message(const char* msg);
 
 namespace std {
-namespace __1 {
+inline namespace __1 {
 
 __attribute__((visibility("default"), weak))
 void __libcpp_verbose_abort(char const* format, ...) noexcept {
