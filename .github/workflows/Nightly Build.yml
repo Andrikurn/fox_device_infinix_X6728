@@ -65,6 +65,7 @@ jobs:
       run: |
         cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}
         git clone https://github.com/${{ github.repository }} -b ${{ env.DEVICE_BRANCH }} ./${{ env.DEVICE_PATH }}
+        git -C ./${{ env.DEVICE_PATH }} checkout ${{ github.sha }}
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
     - name: Set Swap Space
