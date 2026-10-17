@@ -17,13 +17,13 @@ OF_DEFAULT_KEYMASTER_VERSION := 4.1
 # AIDL Boot HAL
 OF_USE_AIDL_BOOT_CONTROL := 1
 
+# Flashlight
+OF_FLASHLIGHT_ENABLE := 1
+OF_FL_PATH1 := /sys/class/flashlight_core/flashlight
+
 # Additional configs
 OF_SUPPORT_VBMETA_AVB2_PATCHING := 1
 OF_FORCE_PREBUILT_KERNEL := 1
 OF_USE_GREEN_LED := 0
-
-# Disable flashlight.
-# (The device uses ioctl call to /dev/flashlight instead of traditional sysfs write.)
-OF_FLASHLIGHT_ENABLE := 0
 
 OF_MAINTAINER := Andriann.
