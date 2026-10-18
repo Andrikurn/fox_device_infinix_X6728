@@ -180,3 +180,5 @@ transsion_tranlog.ko
 tkv.ko
 tkv_recovery.ko
 tran_perf_util.ko
+flashlight.ko
+aw36515.ko

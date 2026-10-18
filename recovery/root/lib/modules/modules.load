@@ -165,3 +165,5 @@ sec.ko
 sec-rng.ko
 tkv.ko
 tkv_recovery.ko
+flashlight.ko
+aw36515.ko

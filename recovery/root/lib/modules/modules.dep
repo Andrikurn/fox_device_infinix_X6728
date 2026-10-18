@@ -184,3 +184,5 @@
 /lib/modules/uload_ind.ko: /lib/modules/load_track.ko
 /lib/modules/mtk-mmdvfs-ftrace.ko:
 /lib/modules/chipone_icnl99xx.ko: /lib/modules/adaptive-ts.ko /lib/modules/mtk_disp_notify.ko /lib/modules/tnek.ko /lib/modules/transsion_tranlog.ko
+/lib/modules/aw36515.ko: /lib/modules/flashlight.ko /lib/modules/mtk_pbm.ko /lib/modules/mtk_mdpm_v1.ko /lib/modules/mtk_dynamic_loading_throttling.ko
+/lib/modules/flashlight.ko: /lib/modules/mtk_pbm.ko /lib/modules/mtk_mdpm_v1.ko /lib/modules/mtk_dynamic_loading_throttling.ko
