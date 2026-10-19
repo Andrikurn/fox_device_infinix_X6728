@@ -113,6 +113,9 @@ PRODUCT_PACKAGES += \
 TARGET_RECOVERY_DEVICE_MODULES += \
     libverbose_abort_shim
 
+TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES += \
+    $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/libverbose_abort_shim.so
+
 # Update engine
 PRODUCT_PACKAGES += \
     update_engine \
