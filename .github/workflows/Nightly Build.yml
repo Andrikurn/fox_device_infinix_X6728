@@ -19,6 +19,17 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      actions: write
+    env:
+      USE_CCACHE: '1'
+      CCACHE_EXEC: /usr/bin/ccache
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}/workspace
+      CCACHE_MAXSIZE: 5G
+      CCACHE_COMPRESS: '1'
+      CCACHE_COMPRESSLEVEL: '6'
+      CCACHE_COMPILERCHECK: content
+      CCACHE_SLOPPINESS: include_file_mtime,include_file_ctime,time_macros
     steps:
 
     - name: Check Out
@@ -39,7 +50,7 @@ jobs:
         sudo apt update && sudo apt upgrade -y
         DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
             linux-modules-extra-$(uname -r) \
-            git python3 tar aria2 patch
+            git python3 tar aria2 patch ccache
         git clone https://gitlab.com/OrangeFox/misc/scripts
         cd scripts
         sudo bash setup/android_build_env.sh
@@ -73,7 +84,30 @@ jobs:
       with:
         swap-size-gb: 12
 
+    - name: Prepare Ccache
+      id: ccache-prep
+      run: |
+        set -e
+        test -x "$CCACHE_EXEC" || { echo "::error::$CCACHE_EXEC not found"; exit 1; }
+        echo "prefix=ccache-${MANIFEST_BRANCH}-${DEVICE_NAME}-" >> "$GITHUB_OUTPUT"
+        mkdir -p "$CCACHE_DIR"
+
+    - name: Restore Ccache
+      id: ccache-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: ${{ steps.ccache-prep.outputs.prefix }}${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: ${{ steps.ccache-prep.outputs.prefix }}
+
+    - name: Configure Ccache
+      run: |
+        ccache --set-config=max_size="$CCACHE_MAXSIZE"
+        ccache --zero-stats
+        echo "Restored: ${{ steps.ccache-restore.outputs.cache-matched-key || 'none (cold cache)' }}"
+
     - name: Build recovery
+      id: build
       run: |
         cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}
         set +e
@@ -84,25 +118,92 @@ jobs:
         mka adbd ${{ env.BUILD_TARGET }}image -j$(nproc --all) 2>&1 | tee ${{ steps.pwd.outputs.workspace-folder }}/build.log
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
+    - name: Report Ccache hit rate
+      id: ccache-stats
+      if: always() && steps.build.conclusion != 'skipped'
+      run: |
+        ccache --show-stats -v || true
+        HITS=$(ccache --print-stats | awk -F'\t' '$1=="direct_cache_hit"||$1=="preprocessed_cache_hit"{s+=$2} END{print s+0}')
+        MISS=$(ccache --print-stats | awk -F'\t' '$1=="cache_miss"{s+=$2} END{print s+0}')
+        TOTAL=$((HITS + MISS))
+        {
+          echo "### ccache"
+          echo "- hits: $HITS / misses: $MISS"
+          [ "$TOTAL" -gt 0 ] && echo "- hit rate: $((100 * HITS / TOTAL))%"
+          echo "- restored key: ${{ steps.ccache-restore.outputs.cache-matched-key || 'none (cold cache)' }}"
+        } >> "$GITHUB_STEP_SUMMARY"
+        if [ "$TOTAL" -eq 0 ]; then
+          echo "::warning::ccache saw 0 compiler calls - Soong did not use it (check USE_CCACHE / CCACHE_EXEC)."
+        fi
+        echo "save=$([ "$MISS" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+    - name: Save Ccache
+      id: ccache-save
+      if: always() && steps.ccache-stats.outputs.save == 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: ${{ steps.ccache-prep.outputs.prefix }}${{ github.run_id }}-${{ github.run_attempt }}
+
+    - name: Prune old Ccache
+      if: always() && steps.ccache-save.outcome == 'success'
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh cache list --repo "$GITHUB_REPOSITORY" --key "${{ steps.ccache-prep.outputs.prefix }}" \
+          --sort created_at --order desc --limit 100 --json id --jq '.[1:][].id' \
+          | while read -r id; do gh cache delete "$id" --repo "$GITHUB_REPOSITORY" || true; done
+
     - name: Check the output directory
       run: |
         ls -al ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/
         echo
         ls -al ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}/
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+    - name: Stage files and generate checksums
+      run: |
+        set -e
+        OUT=${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}
+        mkdir -p stage
+
+        test -s "$OUT/vendor_boot.img" || { echo "::error::vendor_boot.img was not produced."; exit 1; }
+        cp "$OUT/vendor_boot.img" stage/
+
+        zips=("$OUT"/*.zip)
+        [ "${#zips[@]}" -eq 1 ] && [ -f "${zips[0]}" ] || { echo "::error::expected exactly one .zip in $OUT, found ${#zips[@]}"; exit 1; }
+        cp "${zips[0]}" stage/
+
+        cd stage
+        sha256sum -- * > SHA256SUMS.txt
+        cat SHA256SUMS.txt
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+
+    - name: Upload vendor_boot image
+      uses: actions/upload-artifact@v7
       with:
-        name: OrangeFox-${{ env.DEVICE_NAME }}-${{ github.run_id }}
-        path: |
-          ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}/*.img
-          ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}/out/target/product/${{ env.DEVICE_NAME }}/*.zip
+        path: ${{ steps.pwd.outputs.workspace-folder }}/stage/vendor_boot.img
+        archive: false
+        if-no-files-found: error
+
+    - name: Upload recovery zip
+      uses: actions/upload-artifact@v7
+      with:
+        path: ${{ steps.pwd.outputs.workspace-folder }}/stage/*.zip
+        archive: false
+        if-no-files-found: error
+
+    - name: Upload checksums
+      uses: actions/upload-artifact@v7
+      with:
+        path: ${{ steps.pwd.outputs.workspace-folder }}/stage/SHA256SUMS.txt
+        archive: false
         if-no-files-found: error
 
     - name: Upload build log
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
-        name: build-log-${{ github.run_id }}
         path: ${{ steps.pwd.outputs.workspace-folder }}/build.log
+        archive: false
         if-no-files-found: ignore
