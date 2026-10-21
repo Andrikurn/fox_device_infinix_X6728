@@ -49,7 +49,7 @@ jobs:
       run: |
         sudo apt update && sudo apt upgrade -y
         DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
-            linux-modules-extra-$(uname -r) \
+            linux-modules-extra-azure \
             git python3 tar aria2 patch ccache
         git clone https://gitlab.com/OrangeFox/misc/scripts
         cd scripts
