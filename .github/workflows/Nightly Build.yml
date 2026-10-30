@@ -7,7 +7,7 @@ env:
   SYNC_URL: 'https://gitlab.com/OrangeFox/sync.git'
   MANIFEST_BRANCH: '14.1'
   DEVICE_PATH: 'device/infinix/X6728'
-  DEVICE_BRANCH: 'fox_14.1'
+  DEVICE_BRANCH: 'fox_14.1-tranos16'
   DEVICE_NAME: 'X6728'
   MAKEFILE_NAME: 'fox_X6728'
   BUILD_TARGET: 'vendorboot'
