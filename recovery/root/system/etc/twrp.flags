@@ -4,35 +4,35 @@
 
 # mount point		fs		device						device2			 device3			flags
 # User writeable partitions
-/boot			emmc		/dev/block/by-name/boot											flags=display=boot;slotselect;backup;flashimg
-/vendor_boot	emmc		/dev/block/by-name/vendor_boot									flags=display=vendor_boot;slotselect;backup;flashimg
-/vbmeta			emmc		/dev/block/by-name/vbmeta										flags=display=vbmeta;slotselect;backup;flashimg
-/vbmeta_system	emmc		/dev/block/by-name/vbmeta_system								flags=display=vbmeta_system;slotselect;backup;flashimg
-/vbmeta_vendor	emmc		/dev/block/by-name/vbmeta_vendor								flags=display=vbmeta_vendor;slotselect;backup;flashimg
+/boot			emmc		/dev/block/by-name/boot											flags=display="Boot";slotselect;backup;flashimg
+/vendor_boot	emmc		/dev/block/by-name/vendor_boot									flags=display="Vendor Boot";slotselect;backup;flashimg
+/vbmeta			emmc		/dev/block/by-name/vbmeta										flags=display="VBMeta";slotselect;backup;flashimg
+/vbmeta_system	emmc		/dev/block/by-name/vbmeta_system								flags=display="VBMeta System";slotselect;backup;flashimg
+/vbmeta_vendor	emmc		/dev/block/by-name/vbmeta_vendor								flags=display="VBMeta Vendor";slotselect;backup;flashimg
 
 # Firmware
-/dtbo			emmc		/dev/block/by-name/dtbo											flags=display=dtbo;slotselect;backup
-/metadata		f2fs		/dev/block/by-name/metadata										flags=display=metadata;backup
-/misc			emmc		/dev/block/by-name/misc											flags=display=misc;backup
+/dtbo			emmc		/dev/block/by-name/dtbo											flags=display="DTBO";slotselect;backup
+/metadata		f2fs		/dev/block/by-name/metadata										flags=display="Metadata";backup
+/misc			emmc		/dev/block/by-name/misc											flags=display="Misc";backup
 
 # Sensitive Data
-/nvcfg			ext4		/dev/block/by-name/nvcfg										flags=display=nvcfg;backup
-/persist		ext4		/dev/block/by-name/persist										flags=display=persist;backup
-/persistent		emmc		/dev/block/by-name/frp											flags=display=persistent;backup
+/nvcfg			ext4		/dev/block/by-name/nvcfg										flags=display="NVCFG";backup
+/persist		ext4		/dev/block/by-name/persist										flags=display="Persist";backup
+/persistent		emmc		/dev/block/by-name/frp											flags=display="FRP";backup
 
 # IMEI and modem related
-/nvdata			ext4		/dev/block/by-name/nvdata										flags=display=nvdata;backup
-/protect_f		ext4		/dev/block/by-name/protect1										flags=display=protect_f;backup
-/protect_s		ext4		/dev/block/by-name/protect2										flags=display=protect_s;backup
-/nvram			emmc		/dev/block/by-name/nvram										flags=display=nvram;backup
+/nvdata			ext4		/dev/block/by-name/nvdata										flags=display="NVData";backup
+/protect_f		ext4		/dev/block/by-name/protect1										flags=display="Protect 1";backup
+/protect_s		ext4		/dev/block/by-name/protect2										flags=display="Protect 2";backup
+/nvram			emmc		/dev/block/by-name/nvram										flags=display="NVRAM";backup
 
 # Standard MediaTeks's partitions
-/expdb			emmc		/dev/block/by-name/expdb										flags=display=expdb
-/logo			emmc		/dev/block/by-name/logo											flags=display=logo;slotselect;backup
-/otp			emmc		/dev/block/by-name/otp											flags=display=otp
-/seccfg			emmc		/dev/block/by-name/seccfg										flags=display=seccfg
-/spmfw			emmc		/dev/block/by-name/spmfw										flags=display=spmfw;slotselect
-/tee			emmc		/dev/block/by-name/tee											flags=display=tee;slotselect
+/expdb			emmc		/dev/block/by-name/expdb										flags=display="EXPDB"
+/logo			emmc		/dev/block/by-name/logo											flags=display="Logo";slotselect;backup
+/otp			emmc		/dev/block/by-name/otp											flags=display="OTP"
+/seccfg			emmc		/dev/block/by-name/seccfg										flags=display="Seccfg"
+/spmfw			emmc		/dev/block/by-name/spmfw										flags=display="SPMFW";slotselect
+/tee			emmc		/dev/block/by-name/tee											flags=display="TEE";slotselect
 
 # Removable Storage
 /sdcard1     	auto		/dev/block/mmcblk1p1				/dev/block/mmcblk1						flags=fsflags=utf8;display="MicroSD";storage;wipeingui;removable
